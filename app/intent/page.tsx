@@ -105,7 +105,7 @@ export default function IntentPage() {
   ];
 
   // Replace with your actual Groq API key or move to backend
-  const GROQ_API_KEY = "key";
+  const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY;
 
   const sendMessage = async () => {
     if (!input.trim()) return;
