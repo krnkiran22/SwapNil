@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
@@ -19,7 +19,6 @@ import {
   Settings,
   MessageCircle,
   Bot,
-  User,
   Target,
   Layers,
   Network,
@@ -77,33 +76,6 @@ export default function IntentPage() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  const quickActions = [
-    {
-      icon: Coins,
-      text: "Best Swap Routes",
-      color: "from-cyan-500 to-blue-600",
-      desc: "Find optimal trading paths",
-    },
-    {
-      icon: TrendingUp,
-      text: "Market Analysis",
-      color: "from-green-500 to-emerald-600",
-      desc: "Real-time price insights",
-    },
-    {
-      icon: Shield,
-      text: "Security Check",
-      color: "from-orange-500 to-red-600",
-      desc: "Risk assessment tools",
-    },
-    {
-      icon: Activity,
-      text: "Yield Opportunities",
-      color: "from-cyan-500 to-blue-600",
-      desc: "Maximize your returns",
-    },
-  ];
-
   // Replace with your actual Groq API key or move to backend
   const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY;
 
@@ -158,13 +130,14 @@ export default function IntentPage() {
           suggestions: [], // Add suggestions if needed
         },
       ]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error connecting to Groq API:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to connect to AI. Please try again.";
       setMessages((prev) => [
         ...prev,
         {
           sender: "ai",
-          text: `Error: ${error.message || "Failed to connect to AI. Please try again."}`,
+          text: `Error: ${errorMessage}`,
           timestamp: new Date().toLocaleTimeString(),
           suggestions: [],
         },
@@ -172,10 +145,6 @@ export default function IntentPage() {
     } finally {
       setIsTyping(false);
     }
-  };
-
-  const handleQuickAction = (actionText: string) => {
-    setInput(actionText);
   };
 
   const handleSuggestion = (suggestion: string) => {

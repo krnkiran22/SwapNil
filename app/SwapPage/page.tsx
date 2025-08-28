@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowUpDown, Zap, TrendingUp, Shield, Clock, Settings, Info,
   CheckCircle2, Sparkles, Globe, Lock, BarChart3, Activity, Cpu, Server
@@ -22,7 +21,7 @@ export default function SwapPage() {
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
-  const [slippage, setSlippage] = useState("0.5");
+  const [slippage] = useState("0.5");
   const [estimatedGas, setEstimatedGas] = useState<number | null>(null);
   const [flip, setFlip] = useState(false); // visual flip animation trigger
 
@@ -31,7 +30,6 @@ export default function SwapPage() {
   useEffect(() => {
     if (amount && parseFloat(amount) > 0) {
       setShowQuote(true);
-      const estimated = (parseFloat(amount) * fromToken.price) / toToken.price;
       setEstimatedGas(Math.random() * 50 + 10);
     } else {
       setShowQuote(false);

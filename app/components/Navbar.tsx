@@ -7,6 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 // Leather connection
 // The Window interface is already declared in types/leather.d.ts, so no need to redeclare here.
 
+interface LeatherAddress {
+  symbol: string;
+  address: string;
+}
+
 export default function Navbar() {
   const [account, setAccount] = useState<string | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -40,7 +45,7 @@ export default function Navbar() {
       const addresses = resp?.result?.addresses;
       if (addresses && addresses.length > 0) {
         // Find the STX address (assuming this is for Stacks/SwapZilla)
-        const stxAddressObj = addresses.find((addr: any) => addr.symbol === "STX");
+        const stxAddressObj = addresses.find((addr: LeatherAddress) => addr.symbol === "STX");
         if (stxAddressObj) {
           const address = stxAddressObj.address;
           setAccount(address);

@@ -1,5 +1,5 @@
-const { render, screen } = require('@testing-library/react');
-const Page = require('../page');
+import { render, screen } from '@testing-library/react';
+import Page from '../page';
 
 test('renders page component', () => {
     render(<Page />);
