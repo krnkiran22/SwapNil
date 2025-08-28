@@ -136,7 +136,7 @@ export default function Home() {
             href="/SwapPage"
             className="inline-block bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold px-8 py-4 rounded-2xl shadow-lg text-lg transition-all border border-white/30 hover:scale-[1.02]"
           >
-            Get Started Now
+            Get Started Now -
           </Link>
         </motion.section>
 
