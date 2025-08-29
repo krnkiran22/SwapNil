@@ -103,6 +103,12 @@ export default function Navbar() {
           >
             Intent
           </Link>
+          <Link
+            href="/ai"
+            className="text-lg text-white/80 hover:text-white px-4 py-2 rounded transition"
+          >
+            AI
+          </Link>
 
           {!account ? (
             <button

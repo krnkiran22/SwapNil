@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap");
+
+:root {
+  --leva-sizes-rootWidth: 340px;
+}
+
+.aiagent-root {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background-image: linear-gradient(270deg, #000000, #3b8e9a, #022f49);
+  background-size: 600% 600%;
+  animation: aiagent-gradientAnimation 10s ease infinite;
+  overflow: hidden;
+}
+
+@keyframes aiagent-gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.aiagent-root.greenScreen {
+  background-color: #00ff00 !important;
+  background-image: none !important;
+}
+
+.aiagent-root #btn {
+  border-top-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
