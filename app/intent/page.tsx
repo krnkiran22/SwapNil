@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 
 import Navbar from "../components/Navbar";
+import parse from 'html-react-parser';
+import { useWallet } from '../hooks/useWallet';
 
 const aiCapabilities = [
   {
@@ -64,20 +66,20 @@ export default function IntentPage() {
   const [messages, setMessages] = useState([
     {
       sender: "ai",
-      text: "Welcome to SwapAI! I'm your intelligent DeFi assistant. I can help you with token swaps, liquidity analysis, yield farming opportunities, and market insights. What would you like to explore today?",
+      text: "Welcome to SwapAI! I'm your intelligent DeFi assistant Aurora 😘 I can help you with token swaps, wallet connections, and more! Try saying 'connect my leather wallet' or 'check my wallet status'.",
       timestamp: new Date().toLocaleTimeString(),
       suggestions: [
-        "Find best STX to USDC route",
-        "Analyze yield opportunities",
-        "Check gas optimization",
+        "Connect my leather wallet",
+        "Check wallet status", 
+        "Disconnect wallet",
       ],
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-
-  // Replace with your actual Groq API key or move to backend
-  const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY;
+  
+  // Wallet hook for AI automation
+  const { connectWallet, disconnectWallet, getWalletInfo } = useWallet();
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -93,22 +95,14 @@ export default function IntentPage() {
     setIsTyping(true);
 
     try {
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "llama3-70b-8192",
-          messages: [
-            ...messages.map((m) => ({
-              role: m.sender === "user" ? "user" : "assistant",
-              content: m.text,
-            })),
-            { role: "user", content: input },
-          ],
-          max_tokens: 1000, // Optional: Adjust based on desired response length
+          query: input,
+          conversation_id: "default-conversation"
         }),
       });
 
@@ -117,9 +111,45 @@ export default function IntentPage() {
       }
 
       const data = await response.json();
-      const aiText =
-        data.choices?.[0]?.message?.content ||
-        "Sorry, I could not get a response.";
+      console.log("Full response data:", data);
+      console.log("Function call data:", data?.response?.function_call);
+      
+      // Simple text extraction - try multiple approaches
+      let aiText = "";
+      
+      // Method 1: Try to get text from messages array
+      if (data?.response?.messages && Array.isArray(data.response.messages) && data.response.messages.length > 0) {
+        const firstMessage = data.response.messages[0];
+        if (firstMessage && firstMessage.text) {
+          aiText = firstMessage.text;
+          console.log("Got text from first message:", aiText);
+        }
+      }
+      
+      // Method 2: Try html_response
+      if (!aiText && data?.response?.html_response) {
+        aiText = data.response.html_response;
+        console.log("Got text from html_response:", aiText);
+      }
+      
+      // Method 3: Try direct html_response
+      if (!aiText && data?.html_response) {
+        aiText = data.html_response;
+        console.log("Got text from direct html_response:", aiText);
+      }
+      
+      // Clean any HTML tags if present
+      if (aiText && typeof aiText === 'string') {
+        aiText = aiText.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+      }
+      
+      // Fallback
+      if (!aiText || typeof aiText !== 'string') {
+        aiText = "Hey babe! 😘";
+        console.log("Using fallback text");
+      }
+      
+      console.log("Final text to display:", aiText);
       
       setMessages((prev) => [
         ...prev,
@@ -130,6 +160,82 @@ export default function IntentPage() {
           suggestions: [], // Add suggestions if needed
         },
       ]);
+      
+      // Execute function if AI requested one
+      if (data?.response?.function_call) {
+        const functionCall = data.response.function_call;
+        console.log("AI requested function:", functionCall);
+        console.log("Function name:", functionCall.name);
+        
+        try {
+          switch (functionCall.name) {
+            case 'connectWallet':
+              console.log("Executing connectWallet function...");
+              await connectWallet();
+              // Add confirmation message
+              setMessages((prev) => [
+                ...prev,
+                {
+                  sender: "ai",
+                  text: "Done babe! 😘 Your wallet is now connected.",
+                  timestamp: new Date().toLocaleTimeString(),
+                  suggestions: [],
+                },
+              ]);
+              break;
+              
+            case 'disconnectWallet':
+              disconnectWallet();
+              setMessages((prev) => [
+                ...prev,
+                {
+                  sender: "ai",
+                  text: "Wallet disconnected successfully! 💕",
+                  timestamp: new Date().toLocaleTimeString(),
+                  suggestions: [],
+                },
+              ]);
+              break;
+              
+            case 'getWalletInfo':
+              const walletInfo = getWalletInfo();
+              const infoText = walletInfo.isConnected 
+                ? `Your wallet is connected! 🔗 Address: ${walletInfo.address?.slice(0, 8)}...`
+                : "No wallet connected yet babe! 💕 Want me to connect it?";
+              setMessages((prev) => [
+                ...prev,
+                {
+                  sender: "ai",
+                  text: infoText,
+                  timestamp: new Date().toLocaleTimeString(),
+                  suggestions: [],
+                },
+              ]);
+              break;
+              
+            default:
+              console.log("Unknown function:", functionCall.name);
+          }
+        } catch (error) {
+          console.error("Error executing function:", error);
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "ai",
+              text: "Oops! Something went wrong babe. 😅 Let me try again.",
+              timestamp: new Date().toLocaleTimeString(),
+              suggestions: [],
+            },
+          ]);
+        }
+      } else {
+        console.log("No function call detected in AI response");
+        console.log("Response structure:", {
+          hasResponse: !!data?.response,
+          hasFunction: !!data?.response?.function_call,
+          functionValue: data?.response?.function_call
+        });
+      }
     } catch (error: unknown) {
       console.error("Error connecting to Groq API:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to connect to AI. Please try again.";
