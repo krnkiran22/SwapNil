@@ -19,10 +19,16 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=GROQ_API_KEY)
 
 
-@app.route('/chat', methods=['GET'])
+
+@app.route('/chat', methods=['GET', 'POST'])
 def chat():
-    query = request.args.get('query')
-    conversation_id = request.args.get('conversation_id')
+    if request.method == 'POST':
+        data = request.get_json()
+        query = data.get('query')
+        conversation_id = data.get('conversation_id')
+    else:
+        query = request.args.get('query')
+        conversation_id = request.args.get('conversation_id')
 
     if not query:
         return Response("Error: Query parameter is required", status=400, content_type="text/plain")
@@ -36,7 +42,6 @@ def chat():
         prompt_path = os.path.join(current_path, "web3_prompt.txt")
         with open(prompt_path, "r") as file:
             web3_prompt = file.read()
-            
         web3_prompt = get_mixed_prompt()
         web3_prompt = web3_prompt + '''
         Intro:
@@ -84,7 +89,6 @@ def chat():
         use the animation name for the fit of the text.
         dont add any link or emojis. just use the text for that message's object array's text.
         '''
-        
         print(web3_prompt)
         conversation_history[conversation_id] = [
             SystemMessage(content=web3_prompt)

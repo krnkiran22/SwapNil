@@ -94,7 +94,7 @@ export const UI = ({ hidden, ...props }: UIProps) => {
         </div>
         <div className="w-full flex flex-col sm:flex-row items-end justify-center gap-4" style={{ display: 'grid', justifyItems: 'start', alignContent: 'stretch', justifyContent: 'end' }}>
           <select
-            className="pointer-events-auto p-2 rounded-md bg-white bg-opacity-75 text-sm"
+            className="pointer-events-auto p-2 rounded-md bg-white text-black bg-opacity-75 text-sm"
             value={language}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLanguage(e.target.value as "en" | "te" | "ur" | "hi")}
           >
@@ -178,7 +178,7 @@ export const UI = ({ hidden, ...props }: UIProps) => {
         )}
         <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto mt-4">
           <input
-            className="w-full placeholder:text-gray-800 placeholder:italic p-3 sm:p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md text-xs sm:text-sm"
+            className="w-full placeholder:text-gray-800 placeholder:italic p-3 sm:p-4 rounded-md bg-opacity-50 bg-white text-black backdrop-blur-md text-xs sm:text-sm"
             placeholder={language === "te" ? "సందేశాన్ని టైప్ చేయండి..." : language === "ur" ? "ایک پیغام ٹائپ کریں..." : language === "hi" ? "एक संदेश टाइप करें..." : "Type a message..."}
             ref={input}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
