@@ -2,45 +2,137 @@
 import { useState, useEffect } from "react";
 import {
   ArrowUpDown, Zap, TrendingUp, Shield, Clock, Settings, Info,
-  CheckCircle2, Sparkles, Globe, Lock, BarChart3, Activity, Cpu, Server
+  CheckCircle2, Sparkles, Globe, Lock, BarChart3, Activity, Cpu, Server,
+  ExternalLink, X
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
+// Realistic Stacks ecosystem tokens
 const tokens = [
-  { symbol: "AVAX", name: "Avalanche", price: 42.15, change: 5.2, logo: "🔺" },
-  { symbol: "USDC", name: "USD Coin", price: 1.0, change: 0.1, logo: "💵" },
-  { symbol: "ETH", name: "Ethereum", price: 3245.78, change: -2.1, logo: "⟐" },
-  { symbol: "BTC", name: "Bitcoin", price: 68420.5, change: 3.8, logo: "₿" },
-  { symbol: "LINK", name: "Chainlink", price: 18.65, change: 7.3, logo: "🔗" },
-  { symbol: "UNI", name: "Uniswap", price: 12.34, change: -1.5, logo: "🦄" }
+  { symbol: "STX", name: "Stacks", price: 1.85, change: 5.2, logo: "�", decimals: 6 },
+  { symbol: "sBTC", name: "Stacks Bitcoin", price: 67890.5, change: 3.8, logo: "₿", decimals: 8 },
+  { symbol: "ALEX", name: "Alex Protocol", price: 0.12, change: -2.1, logo: "🔶", decimals: 8 },
+  { symbol: "WELSH", name: "Welsh Corgi", price: 0.0001, change: 15.3, logo: "🐕", decimals: 6 },
+  { symbol: "DIKO", name: "Arkadiko", price: 0.089, change: 7.3, logo: "🏛️", decimals: 6 },
+  { symbol: "NYC", name: "New York City Coin", price: 0.0012, change: -1.5, logo: "🗽", decimals: 6 }
 ];
 
+// Toast notification component
+const Toast = ({ message, type, txHash, onClose, isVisible }: {
+  message: string;
+  type: 'success' | 'error' | 'info';
+  txHash?: string;
+  onClose: () => void;
+  isVisible: boolean;
+}) => {
+  const explorerUrl = `https://explorer.stacks.co/txid/${txHash}?chain=testnet`;
+  
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed top-24 right-6 z-50 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl max-w-sm animate-in slide-in-from-right-full duration-300">
+      <div className="flex items-start gap-3">
+        <div className={`w-2 h-2 rounded-full mt-2 ${
+          type === 'success' ? 'bg-emerald-400' : 
+          type === 'error' ? 'bg-rose-400' : 'bg-blue-400'
+        }`} />
+        <div className="flex-1">
+          <p className="text-white font-medium text-sm">{message}</p>
+          {txHash && (
+            <a 
+              href={explorerUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-teal-300 hover:text-teal-200 text-xs inline-flex items-center gap-1 mt-2 transition-colors"
+            >
+              View on Explorer <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+        </div>
+        <button 
+          onClick={onClose}
+          className="text-white/60 hover:text-white/80 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function SwapPage() {
-  const [fromToken, setFromToken] = useState(tokens[0]);
-  const [toToken, setToToken] = useState(tokens[1]);
+  // Set STX as default from token and sBTC as default to token
+  const [fromToken, setFromToken] = useState(tokens[0]); // STX
+  const [toToken, setToToken] = useState(tokens[1]); // sBTC
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
   const [slippage] = useState("0.5");
   const [estimatedGas, setEstimatedGas] = useState<number | null>(null);
-  const [flip, setFlip] = useState(false); // visual flip animation trigger
+  const [flip, setFlip] = useState(false);
+  
+  // Toast state
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: 'success' | 'error' | 'info';
+    txHash?: string;
+  }>({
+    isVisible: false,
+    message: '',
+    type: 'info'
+  });
 
+  // Generate realistic Stacks testnet transaction hash
+  const generateStacksTxHash = () => {
+    // Use the specific hash provided by user
+    return '0xe3113d946115d75ce0687663d18318a37fce0f6d6d1b3236e94f736b49ca4149';
+  };
 
   // Mock quote calculation
   useEffect(() => {
     if (amount && parseFloat(amount) > 0) {
       setShowQuote(true);
-      setEstimatedGas(Math.random() * 50 + 10);
+      // Realistic gas estimation for Stacks
+      setEstimatedGas(Math.random() * 0.1 + 0.05); // 0.05-0.15 STX
     } else {
       setShowQuote(false);
     }
   }, [amount, fromToken, toToken]);
 
-  const handleSwap = () => {
+  const handleSwap = async () => {
+    if (!amount || parseFloat(amount) <= 0) return;
+    
     setIsLoading(true);
+    
+    // Show processing toast
+    setToast({
+      isVisible: true,
+      message: "Processing swap transaction...",
+      type: 'info'
+    });
+
+    // Simulate transaction processing (2 seconds)
     setTimeout(() => {
+      const txHash = generateStacksTxHash();
+      
       setIsLoading(false);
-      // Mock successful swap
+      
+      // Show success toast with transaction hash
+      setToast({
+        isVisible: true,
+        message: `Swap successful! ${parseFloat(amount).toFixed(6)} ${fromToken.symbol} → ${estimatedOutput} ${toToken.symbol}`,
+        type: 'success',
+        txHash: txHash
+      });
+      
+      // Clear amount after successful swap
+      setAmount("");
+      
+      // Auto-hide toast after 8 seconds
+      setTimeout(() => {
+        setToast(prev => ({ ...prev, isVisible: false }));
+      }, 8000);
     }, 2000);
   };
 
@@ -55,7 +147,7 @@ export default function SwapPage() {
   };
 
   const estimatedOutput =
-    amount ? ((parseFloat(amount) * fromToken.price) / toToken.price).toFixed(6) : "0";
+    amount ? ((parseFloat(amount) * fromToken.price) / toToken.price).toFixed(toToken.decimals) : "0";
 
   // ---- extra derived insights (pure UI) ----
   const priceRatio = (fromToken.price / toToken.price) || 0;
@@ -64,17 +156,22 @@ export default function SwapPage() {
   const liquidityTier = tradeSizeUsd < 1_000 ? "Retail" : tradeSizeUsd < 25_000 ? "Pro" : "Whale";
   const volatility = Math.abs(fromToken.change) + Math.abs(toToken.change); // mock composite
 
+  const closeToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
+
   return (
     <>
       <Navbar />
+      <Toast 
+        message={toast.message}
+        type={toast.type}
+        txHash={toast.txHash}
+        onClose={closeToast}
+        isVisible={toast.isVisible}
+      />
       <div className="min-h-screen relative overflow-hidden pt-20"
            style={{ background: "radial-gradient(1200px 800px at 10% -10%, #0EA5E922, transparent), radial-gradient(900px 700px at 90% 110%, #22C55E22, transparent), linear-gradient(180deg,#0B0F19 0%, #0A0E17 100%)" }}>
-
-        {/* Neon Orbs / Glass Glow */}
-        {/* <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -right-40 w-[28rem] h-[28rem] rounded-full blur-3xl bg-cyan-500/20 animate-pulse" />
-          <div className="absolute -bottom-40 -left-40 w-[28rem] h-[28rem] rounded-full blur-3xl bg-fuchsia-500/10 animate-pulse [animation-delay:1s]" />
-        </div> */}
 
         <div className="relative z-10 px-4 py-12">
           <div className="max-w-7xl mx-auto">
@@ -82,13 +179,13 @@ export default function SwapPage() {
             <div className="text-center mb-12">
               <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-6 py-2 mb-6 shadow-[0_0_40px_rgba(0,255,209,0.15)]">
                 <Sparkles className="w-4 h-4 text-teal-300" />
-                <span className="text-teal-200 text-sm font-medium">AI-Optimized Cross-DEX Routing</span>
+                <span className="text-teal-200 text-sm font-medium">Stacks DeFi • Lightning Fast Swaps</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-teal-100 to-fuchsia-200 bg-clip-text text-transparent mb-3">
                 Token Swap
               </h1>
               <p className="text-lg text-white/70 max-w-3xl mx-auto">
-                Premium, lightning-fast swaps with smart routing, MEV-aware protection, and concierge-grade UX.
+                Trade STX, sBTC and other Stacks ecosystem tokens with optimal routing and MEV protection.
               </p>
             </div>
 
@@ -99,7 +196,7 @@ export default function SwapPage() {
                 <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-6 border border-white/10 shadow-2xl">
                   <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-teal-300" />
-                    Market Overview
+                    Stacks Ecosystem
                   </h3>
                   <div className="space-y-4">
                     {tokens.slice(0, 4).map((token) => (
@@ -112,7 +209,7 @@ export default function SwapPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-white font-semibold">${token.price.toLocaleString()}</p>
+                          <p className="text-white font-semibold">${token.price < 1 ? token.price.toFixed(6) : token.price.toLocaleString()}</p>
                           <p className={`text-xs ${token.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {token.change >= 0 ? '+' : ''}{token.change}%
                           </p>
@@ -122,24 +219,24 @@ export default function SwapPage() {
                   </div>
                 </div>
 
-                {/* Blockchain Stack (generic, not Avalanche-specific) */}
+                {/* Stacks Blockchain Info */}
                 <div className="bg-white/5 backdrop-blur-2xl rounded-3xl p-6 border border-white/10 shadow-2xl">
                   <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                     <Shield className="w-5 h-5 text-emerald-300" />
-                    Blockchain Stack
+                    Stacks Network
                   </h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2 text-white/80">
-                      <Cpu className="w-4 h-4 text-teal-300" /> EVM Compatible
+                      <Cpu className="w-4 h-4 text-teal-300" /> Bitcoin Secured
                     </div>
                     <div className="flex items-center gap-2 text-white/80">
-                      <Activity className="w-4 h-4 text-fuchsia-300" /> ~1–2s Block Time
+                      <Activity className="w-4 h-4 text-fuchsia-300" /> ~10min Blocks
                     </div>
                     <div className="flex items-center gap-2 text-white/80">
-                      <Server className="w-4 h-4 text-cyan-300" /> PoS / Rollup
+                      <Server className="w-4 h-4 text-cyan-300" /> PoX Consensus
                     </div>
                     <div className="flex items-center gap-2 text-white/80">
-                      <Globe className="w-4 h-4 text-amber-300" /> Cross-DEX Routing
+                      <Globe className="w-4 h-4 text-amber-300" /> Smart Contracts
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-2">
@@ -147,7 +244,7 @@ export default function SwapPage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300"></span>
                     </span>
-                    <span className="text-emerald-300 text-xs">Network healthy • Low fees</span>
+                    <span className="text-emerald-300 text-xs">Network healthy • Testnet active</span>
                   </div>
                 </div>
               </div>
@@ -193,7 +290,7 @@ export default function SwapPage() {
                               </option>
                             ))}
                           </select>
-                          <p className="text-white/60 text-xs">Balance: 1,234.56</p>
+                          <p className="text-white/60 text-xs">Balance: {fromToken.symbol === 'STX' ? '496.9' : fromToken.symbol === 'sBTC' ? '0.15678234' : '567.89'}</p>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -241,7 +338,7 @@ export default function SwapPage() {
                               </option>
                             ))}
                           </select>
-                          <p className="text-white/60 text-xs">Balance: 567.89</p>
+                          <p className="text-white/60 text-xs">Balance: {toToken.symbol === 'STX' ? '496.9' : toToken.symbol === 'sBTC' ? '0.15678234' : '567.89'}</p>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -277,12 +374,12 @@ export default function SwapPage() {
                           <div>
                             <p className="text-white/60 text-xs">Network Fee</p>
                             <p className="text-white font-semibold">
-                              {estimatedGas ? `~$${estimatedGas.toFixed(2)}` : 'Calculating...'}
+                              {estimatedGas ? `~${estimatedGas.toFixed(6)} STX` : 'Calculating...'}
                             </p>
                           </div>
                           <div>
                             <p className="text-white/60 text-xs">Route</p>
-                            <p className="text-teal-300 font-semibold">Smart, MEV-aware</p>
+                            <p className="text-teal-300 font-semibold">ALEX Protocol</p>
                           </div>
                         </div>
                       </div>

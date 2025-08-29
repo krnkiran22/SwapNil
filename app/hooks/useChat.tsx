@@ -55,9 +55,32 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       }
 
       const resp = await response.json();
-      // Assume backend response has a `response` field with `messages` array
+      
+      // Function to parse HTML and extract text content
+      const parseHtmlToText = (html: string): string => {
+        if (typeof window !== 'undefined') {
+          // Create a temporary div to parse HTML and extract text
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          return tempDiv.textContent || tempDiv.innerText || html;
+        }
+        // Fallback for server-side rendering - simple HTML tag removal
+        return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+      };
+      
+      // Extract only text content from messages, ignore facial expressions and animations
       if (resp.response && Array.isArray(resp.response.messages)) {
-        setMessages(prev => [...prev, ...resp.response.messages]);
+        // Combine all text from messages array and create a single message
+        const combinedText = resp.response.messages
+          .map((msg: any) => msg.text || "")
+          .filter((text: string) => text.trim() !== "")
+          .join(" ");
+        
+        const cleanText = parseHtmlToText(combinedText);
+        
+        if (cleanText.trim()) {
+          setMessages(prev => [...prev, { text: cleanText }]);
+        }
       } else {
         setMessages(prev => [
           ...prev,
