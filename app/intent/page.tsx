@@ -507,7 +507,7 @@ export default function IntentPage() {
                     {/* Input */}
                     <div className="flex gap-3">
                       <input
-                        className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 focus:border-teal-500/50 focus:outline-none text-white rounded-2xl px-4 py-3 placeholder-gray-400 transition-all duration-300"
+                        className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 focus:border-teal-500/50 focus:outline-none text-black rounded-2xl px-4 py-3 placeholder-gray-400 transition-all duration-300"
                         placeholder="Ask me about swaps, yields, market analysis, or any DeFi strategy..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}

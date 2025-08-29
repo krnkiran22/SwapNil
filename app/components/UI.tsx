@@ -178,7 +178,7 @@ export const UI = ({ hidden, ...props }: UIProps) => {
         )}
         <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto mt-4">
           <input
-            className="w-full placeholder:text-gray-800 placeholder:italic p-3 sm:p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md text-xs sm:text-sm"
+            className="w-full placeholder:text-gray-800 placeholder:italic p-3 sm:p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md text-xs sm:text-sm text-black"
             placeholder={language === "te" ? "సందేశాన్ని టైప్ చేయండి..." : language === "ur" ? "ایک پیغام ٹائپ کریں..." : language === "hi" ? "एक संदेश टाइप करें..." : "Type a message..."}
             ref={input}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {

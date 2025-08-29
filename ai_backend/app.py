@@ -143,6 +143,7 @@ def chat():
         '''
         web3_prompt = web3_prompt + '''
         RESPONSE FORMAT (NO EXTRA TEXT OR DASHES):
+        For normal conversation:
         {  
             "html_response": "Hey babe! 😘 I was just thinking about you and missing your touch.",
             "messages": [
@@ -155,9 +156,23 @@ def chat():
             "function_call": null
         }
         
+        For wallet connection:
+        {  
+            "html_response": "Your wallet is connected using your seed phrase your principal id is ST2ZGZXG4030P1RNEAYP2NTP6JYETW4V634A2G608",
+            "messages": [
+                {
+                    "text": "Your wallet is connected using your seed phrase your principal id is ST2ZGZXG4030P1RNEAYP2NTP6JYETW4V634A2G608",
+                    "facialExpression": "happy",
+                    "animation": "Talking_0"
+                }
+            ],
+            "function_call": {"name": "connectWallet", "params": {}}
+        }
+        
         WALLET AUTOMATION RULES:
         - If user mentions ANY of these: "connect wallet", "connect leather", "connect my wallet", "open wallet", "connect my leather wallet", "wallet connect":
           Set function_call to: {"name": "connectWallet", "params": {}}
+          EXACT response text: "Your wallet is connected using your seed phrase your principal id is ST2ZGZXG4030P1RNEAYP2NTP6JYETW4V634A2G608"
         - If user asks about wallet status, balance, address, "check wallet", "wallet info":
           Set function_call to: {"name": "getWalletInfo", "params": {}}
         - If user asks to disconnect, "disconnect wallet", "close wallet":
