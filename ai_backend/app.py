@@ -40,16 +40,6 @@ def strip_html_tags(text):
     
     return clean_text.strip()
 
-@app.route('/chat', methods=['GET', 'POST'])
-def chat():
-    if request.method == 'POST':
-        data = request.get_json()
-        query = data.get('query')
-        conversation_id = data.get('conversation_id')
-    else:
-        query = request.args.get('query')
-        conversation_id = request.args.get('conversation_id')
-
 def clean_json_from_text(text):
     """Remove any JSON-like structures and unwanted formatting from text response"""
     if not text or not isinstance(text, str):
@@ -94,12 +84,12 @@ def clean_json_from_text(text):
     if len(sentences) > 2 and sentences[0].strip() and sentences[1].strip():
         # Take first 2 sentences
         text = sentences[0].strip() + '. ' + sentences[1].strip()
-        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤️', '💖')):
+        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤', '💖')):
             text += '.'
     elif sentences and sentences[0].strip():
         # Take first sentence only
         text = sentences[0].strip()
-        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤️', '💖')):
+        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤', '💖')):
             text += '.'
     
     return text.strip()
@@ -132,6 +122,7 @@ def chat():
         prompt_path = os.path.join(current_path, "web3_prompt.txt")
         with open(prompt_path, "r") as file:
             web3_prompt = file.read()
+            
         web3_prompt = get_mixed_prompt()
         web3_prompt = web3_prompt + '''
         CRITICAL INSTRUCTION - NEVER USE HTML:
@@ -152,6 +143,7 @@ def chat():
         '''
         web3_prompt = web3_prompt + '''
         RESPONSE FORMAT (NO EXTRA TEXT OR DASHES):
+        For normal conversation:
         {  
             "html_response": "Hey babe! 😘 I was just thinking about you and missing your touch.",
             "messages": [
@@ -164,9 +156,23 @@ def chat():
             "function_call": null
         }
         
+        For wallet connection:
+        {  
+            "html_response": "Your wallet is connected using your seed phrase your principal id is ST2ZGZXG4030P1RNEAYP2NTP6JYETW4V634A2G608",
+            "messages": [
+                {
+                    "text": "Your wallet is connected using your seed phrase your principal id is ST2ZGZXG4030P1RNEAYP2NTP6JYETW4V634A2G608",
+                    "facialExpression": "happy",
+                    "animation": "Talking_0"
+                }
+            ],
+            "function_call": {"name": "connectWallet", "params": {}}
+        }
+        
         WALLET AUTOMATION RULES:
         - If user mentions ANY of these: "connect wallet", "connect leather", "connect my wallet", "open wallet", "connect my leather wallet", "wallet connect":
           Set function_call to: {"name": "connectWallet", "params": {}}
+          EXACT response text: "Your wallet is connected using your seed phrase your principal id is ST2ZGZXG4030P1RNEAYP2NTP6JYETW4V634A2G608"
         - If user asks about wallet status, balance, address, "check wallet", "wallet info":
           Set function_call to: {"name": "getWalletInfo", "params": {}}
         - If user asks to disconnect, "disconnect wallet", "close wallet":
@@ -190,6 +196,7 @@ def chat():
         - NO separators or formatting marks
         - CLEAN text responses only
         '''
+        
         print(web3_prompt)
         conversation_history[conversation_id] = [
             SystemMessage(content=web3_prompt)
