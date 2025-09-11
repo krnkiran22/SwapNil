@@ -84,9 +84,9 @@ export default function Navbar() {
           </div>
           <Link
             href="/"
-            className="text-lg text-white/80 hover:text-white px-4 py-2 rounded transition"
+            className="font-bold text-lg text-white/80 hover:text-white px-2 py-2 rounded transition "
           >
-            SwapZilla
+            Virat Kholi Swap
           </Link>
 </div>
         {/* Links + Wallet */}

@@ -1,0 +1,9 @@
+# Deployment plan for testnet
+[[plan.batches]]
+id = 0
+[[plan.batches.transactions]]
+contract-publish = "ai-storage"
+expected-sender = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+cost = 5340
+path = "contracts/ai-storage.clar"
+anchor-block-only = true

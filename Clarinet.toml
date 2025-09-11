@@ -1,0 +1,26 @@
+[project]
+name = "ai-storage"
+description = "A simple contract to store AI requests and responses on Stacks blockchain"
+authors = []
+telemetry = true
+cache_dir = "./.clarinet"
+requirements = []
+boot_contracts = []
+
+[contracts.ai-storage]
+path = "contracts/ai-storage.clar"
+clarity_version = 2
+epoch = 2.4
+
+[repl]
+costs_version = 3
+parser_version = 2
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false

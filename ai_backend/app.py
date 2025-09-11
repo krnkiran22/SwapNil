@@ -84,12 +84,12 @@ def clean_json_from_text(text):
     if len(sentences) > 2 and sentences[0].strip() and sentences[1].strip():
         # Take first 2 sentences
         text = sentences[0].strip() + '. ' + sentences[1].strip()
-        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤️', '💖')):
+        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤', '💖')):
             text += '.'
     elif sentences and sentences[0].strip():
         # Take first sentence only
         text = sentences[0].strip()
-        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤️', '💖')):
+        if not text.endswith(('!', '?', '💕', '😘', '🔥', '💋', '❤', '💖')):
             text += '.'
     
     return text.strip()

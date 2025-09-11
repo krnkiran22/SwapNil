@@ -59,7 +59,7 @@ export default function Home() {
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-teal-100 to-fuchsia-200 bg-clip-text text-transparent mb-4">
-              Trade Smarter with SwapZilla
+              Trade Smarter with ViratKholi swap
             </h1>
             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-8">
               Unlock the power of AI-driven DeFi with seamless token swaps, real-time market insights, and secure wallet operations. Start your journey today.
@@ -90,7 +90,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            Why SwapZilla Stands Out
+            Why ViratKholi swap Stands Out
           </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {features.map((feature, idx) => (
@@ -130,7 +130,7 @@ export default function Home() {
             Ready to Transform Your DeFi Experience?
           </h2>
           <p className="text-lg text-white/80 mb-8">
-            Join thousands of traders using SwapZilla’s AI-powered tools for smarter, faster, and safer DeFi transactions.
+            Join thousands of traders using Virat Kholi AI-powered tools for smarter, faster, and safer DeFi transactions.
           </p>
           <Link
             href="/SwapPage"
@@ -143,7 +143,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="w-full py-8 border-t border-white/10 bg-white/5 text-center">
           <p className="text-white/70 text-sm mb-4">
-            SwapZilla &copy; 2025 | Powered by UnifiedSwapService & AI Technology
+            virat kholi &copy; 2025 | Powered by UnifiedSwapService & AI Technology
           </p>
           <div className="flex justify-center gap-6">
             <Link

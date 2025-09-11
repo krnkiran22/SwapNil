@@ -1,0 +1,10 @@
+[network]
+name = "testnet"
+node_rpc_address = "https://api.testnet.hiro.so"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "april imitate artefact green various connect plunge sick naive bundle novel garlic burst peace leopard embark novel visit school stairs creek current park mind"
+balance = 1000000
+# stx address: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+# btc address: mqVnk6NPRdhntvfm4hh9vvjiRkFDUuSYsH

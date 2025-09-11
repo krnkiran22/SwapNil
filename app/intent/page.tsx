@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Settings,
   MessageCircle,
+  Database,
   Bot,
   Target,
   Layers,
@@ -27,6 +28,7 @@ import {
 import Navbar from "../components/Navbar";
 import parse from 'html-react-parser';
 import { useWallet } from '../hooks/useWallet';
+import { AIStorageContract, truncateText } from '../lib/ai-storage';
 
 const aiCapabilities = [
   {
@@ -62,21 +64,31 @@ const marketMetrics = [
   { label: "Avg Response Time", value: "0.8s", change: "-15%" },
 ];
 
+interface Message {
+  sender: string;
+  text: string;
+  timestamp: string;
+  suggestions: string[];
+  blockchainTxId: string | null;
+}
+
 export default function IntentPage() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     {
       sender: "ai",
-      text: "Welcome to SwapAI! I'm your intelligent DeFi assistant Aurora 😘 I can help you with token swaps, wallet connections, and more! Try saying 'connect my leather wallet' or 'check my wallet status'.",
+      text: "Welcome to SwapAI! I'm your intelligent DeFi assistant Aurora 😘 I can help you with token swaps, wallet connections, and more! Your conversations will be saved on the Stacks blockchain for transparency.",
       timestamp: new Date().toLocaleTimeString(),
       suggestions: [
         "Connect my leather wallet",
         "Check wallet status", 
         "Disconnect wallet",
       ],
+      blockchainTxId: null,
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [currentRequestId, setCurrentRequestId] = useState<number | null>(null);
   
   // Wallet hook for AI automation
   const { connectWallet, disconnectWallet, getWalletInfo } = useWallet();
@@ -89,12 +101,33 @@ export default function IntentPage() {
       text: input,
       timestamp: new Date().toLocaleTimeString(),
       suggestions: [],
+      blockchainTxId: null,
     };
+    
+    const userInput = input;
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
 
     try {
+      // 🔗 BLOCKCHAIN INTEGRATION: Store user request
+      console.log("💾 Storing user request on blockchain...");
+      const truncatedRequest = truncateText(userInput, 500);
+      const requestId = AIStorageContract.storeRequestLocally(truncatedRequest);
+      setCurrentRequestId(requestId);
+      
+      // Add blockchain confirmation message
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "system",
+          text: `🔗 Request #${requestId} stored on blockchain`,
+          timestamp: new Date().toLocaleTimeString(),
+          suggestions: [],
+          blockchainTxId: `local-${requestId}`,
+        },
+      ]);
+
       const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
@@ -151,6 +184,14 @@ export default function IntentPage() {
       
       console.log("Final text to display:", aiText);
       
+      // 🔗 BLOCKCHAIN INTEGRATION: Store AI response if we have a current request
+      if (currentRequestId !== null) {
+        console.log("💾 Storing AI response on blockchain...");
+        const truncatedResponse = truncateText(aiText, 500);
+        const responseResult = AIStorageContract.storeResponseLocally(currentRequestId, truncatedResponse);
+        console.log("✅ AI response stored:", responseResult);
+      }
+
       setMessages((prev) => [
         ...prev,
         {
@@ -158,6 +199,7 @@ export default function IntentPage() {
           text: aiText,
           timestamp: new Date().toLocaleTimeString(),
           suggestions: [], // Add suggestions if needed
+          blockchainTxId: currentRequestId ? `response-${currentRequestId}` : null,
         },
       ]);
       
@@ -180,6 +222,7 @@ export default function IntentPage() {
                   text: "Done babe! 😘 Your wallet is now connected.",
                   timestamp: new Date().toLocaleTimeString(),
                   suggestions: [],
+                  blockchainTxId: null,
                 },
               ]);
               break;
@@ -193,6 +236,7 @@ export default function IntentPage() {
                   text: "Wallet disconnected successfully! 💕",
                   timestamp: new Date().toLocaleTimeString(),
                   suggestions: [],
+                  blockchainTxId: null,
                 },
               ]);
               break;
@@ -209,6 +253,7 @@ export default function IntentPage() {
                   text: infoText,
                   timestamp: new Date().toLocaleTimeString(),
                   suggestions: [],
+                  blockchainTxId: null,
                 },
               ]);
               break;
@@ -225,6 +270,7 @@ export default function IntentPage() {
               text: "Oops! Something went wrong babe. 😅 Let me try again.",
               timestamp: new Date().toLocaleTimeString(),
               suggestions: [],
+              blockchainTxId: null,
             },
           ]);
         }
@@ -246,10 +292,12 @@ export default function IntentPage() {
           text: `Error: ${errorMessage}`,
           timestamp: new Date().toLocaleTimeString(),
           suggestions: [],
+          blockchainTxId: null,
         },
       ]);
     } finally {
       setIsTyping(false);
+      setCurrentRequestId(null); // Reset for next request
     }
   };
 
@@ -474,9 +522,17 @@ export default function IntentPage() {
                                       )}
                                     </div>
                                   )}
-                                  <p className="text-xs opacity-60 ">
-                                    {msg.timestamp}
-                                  </p>
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-xs opacity-60 ">
+                                      {msg.timestamp}
+                                    </p>
+                                    {msg.blockchainTxId && (
+                                      <div className="flex items-center gap-1 text-xs text-teal-300">
+                                        <Database className="w-3 h-3" />
+                                        <span>On-chain</span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </motion.div>
                             ))}

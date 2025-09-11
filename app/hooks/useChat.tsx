@@ -32,6 +32,9 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const processingRef = useRef<boolean>(false);
 
+  // Optionally, you can persist conversation_id in state if you want to keep the conversation going
+  const [conversationId, setConversationId] = useState<string | null>(null);
+
   const chat = async (message: string, language: string = "en") => {
     setLoading(true);
 
@@ -41,7 +44,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, language }),
+        body: JSON.stringify({ query: message, conversation_id: conversationId }),
       });
 
       if (!response.ok) {
@@ -55,6 +58,12 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       }
 
       const resp = await response.json();
+
+      // If backend returns a new conversation_id, update it
+      if (resp.conversation_id) {
+        setConversationId(resp.conversation_id);
+      }
+      // Assume backend response has a `response` field with `messages` array
       
       // Function to parse HTML and extract text content
       const parseHtmlToText = (html: string): string => {
@@ -68,7 +77,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
       };
       
-      // Extract only text content from messages, ignore facial expressions and animations
+
       if (resp.response && Array.isArray(resp.response.messages)) {
         // Combine all text from messages array and create a single message
         const combinedText = resp.response.messages

@@ -3,6 +3,50 @@ import { useChat } from "../hooks/useChat";
 import { FaMicrophone } from "react-icons/fa";
 import { IoSend } from "react-icons/io5";
 
+// Web Speech API type declarations
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+  }
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
 // Define interfaces
 interface Message {
   text: string;
@@ -94,7 +138,7 @@ export const UI = ({ hidden, ...props }: UIProps) => {
         </div>
         <div className="w-full flex flex-col sm:flex-row items-end justify-center gap-4" style={{ display: 'grid', justifyItems: 'start', alignContent: 'stretch', justifyContent: 'end' }}>
           <select
-            className="pointer-events-auto p-2 rounded-md bg-white bg-opacity-75 text-sm"
+            className="pointer-events-auto p-2 rounded-md bg-white text-black bg-opacity-75 text-sm"
             value={language}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLanguage(e.target.value as "en" | "te" | "ur" | "hi")}
           >
@@ -178,7 +222,7 @@ export const UI = ({ hidden, ...props }: UIProps) => {
         )}
         <div className="flex items-center gap-2 pointer-events-auto max-w-screen-sm w-full mx-auto mt-4">
           <input
-            className="w-full placeholder:text-gray-800 placeholder:italic p-3 sm:p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md text-xs sm:text-sm text-black"
+            className="w-full placeholder:text-gray-800 placeholder:italic p-3 sm:p-4 rounded-md bg-opacity-50 bg-white backdrop-blur-md text-xs sm:text-sm"
             placeholder={language === "te" ? "సందేశాన్ని టైప్ చేయండి..." : language === "ur" ? "ایک پیغام ٹائپ کریں..." : language === "hi" ? "एक संदेश टाइप करें..." : "Type a message..."}
             ref={input}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
